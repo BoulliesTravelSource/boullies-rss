@@ -1,24 +1,23 @@
 export default async function handler(req, res) {
   try {
-    // Fetch your Lite feed from Wix
     const response = await fetch("https://www.boulliestravel.com/_functions/getOffersLite");
     const data = await response.json();
     const offers = data.offers || [];
 
-    // RSS header
     let rss = `<?xml version="1.0" encoding="UTF-8" ?>
-    <rss version="2.0">
+    <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
       <title>Boullies Travel Holiday Offers</title>
       <link>https://www.boulliestravel.com/holiday-offers</link>
-      <description>Lite feed of current holiday offers from Boullies Travel</description>`;
+      <description>Lite feed of current holiday offers from Boullies Travel</description>
+      <atom:link href="https://boullies-rss.vercel.app/api/offers-lite" rel="self" type="application/rss+xml" />`;
 
-    // Add each offer as <item>
-    offers.forEach(o => {
+    offers.forEach((o, index) => {
       rss += `
         <item>
           <title><![CDATA[${o.title}]]></title>
           <link>${o.link}</link>
+          <guid isPermaLink="false">${o.id || `offer-${index}`}</guid>
           <description><![CDATA[${o.subtitle || ""}<br><img src="${o.image}" />]]></description>
         </item>`;
     });
@@ -27,7 +26,6 @@ export default async function handler(req, res) {
     </channel>
     </rss>`;
 
-    // Send RSS response
     res.setHeader("Content-Type", "application/rss+xml; charset=utf-8");
     res.status(200).send(rss);
 

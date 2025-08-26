@@ -5,20 +5,22 @@ export default async function handler(req, res) {
     const data = await response.json();
     const offers = data.offers || [];
 
-    // RSS header
+    // RSS header with Atom namespace and self link
     let rss = `<?xml version="1.0" encoding="UTF-8" ?>
-    <rss version="2.0">
+    <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
       <title>Boullies Travel Full Holiday Offers</title>
       <link>https://www.boulliestravel.com/holiday-offers</link>
-      <description>Complete feed of current holiday offers from Boullies Travel</description>`;
+      <description>Complete feed of current holiday offers from Boullies Travel</description>
+      <atom:link href="https://boullies-rss.vercel.app/api/offers-full" rel="self" type="application/rss+xml" />`;
 
     // Add each offer as <item>
-    offers.forEach(o => {
+    offers.forEach((o, index) => {
       rss += `
         <item>
           <title><![CDATA[${o.title || "Untitled Offer"}]]></title>
           <link>${o.link || "https://www.boulliestravel.com/holiday-offers"}</link>
+          <guid isPermaLink="false">${o.id || `offer-${index}`}</guid>
           <description><![CDATA[
             ${o.subtitle ? "<strong>Subtitle:</strong> " + o.subtitle + "<br>" : ""}
             ${o.price ? "<strong>Price:</strong> " + o.price + "<br>" : ""}
@@ -32,9 +34,15 @@ export default async function handler(req, res) {
             ${o.publishDate ? "<strong>Published:</strong> " + o.publishDate + "<br>" : ""}
             ${o.description ? "<br><strong>Description:</strong><br>" + o.description + "<br>" : ""}
             ${o.heroImage ? "<br><img src='" + o.heroImage + "' />" : ""}
-            ${o.mediaGallery && o.mediaGallery.length ? "<br><strong>Gallery:</strong><br>" + o.mediaGallery.map(m => `<img src="${m.src}" alt="${m.alt || ""}" />`).join("<br>") : ""}
+            ${
+              o.mediaGallery && o.mediaGallery.length
+                ? "<br><strong>Gallery:</strong><br>" +
+                  o.mediaGallery
+                    .map(m => `<img src="${m.src}" alt="${m.alt || ""}" />`)
+                    .join("<br>")
+                : ""
+            }
           ]]></description>
-          <guid>${o.id || ""}</guid>
         </item>`;
     });
 
