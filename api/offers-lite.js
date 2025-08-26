@@ -12,12 +12,13 @@ export default async function handler(req, res) {
       <description>Lite feed of current holiday offers from Boullies Travel</description>
       <atom:link href="https://boullies-rss.vercel.app/api/offers-lite" rel="self" type="application/rss+xml" />`;
 
-    // Add a teaser/pinned item
+    // Intro/pinned item
     rss += `
       <item>
         <title><![CDATA[✨ Discover Our Latest Travel Offers ✨]]></title>
         <link>https://www.boulliestravel.com/holiday-offers</link>
         <guid isPermaLink="false">intro-message</guid>
+        <pubDate>${new Date().toUTCString()}</pubDate>
         <description><![CDATA[
           Looking for your next adventure? 🌍✈️<br><br>
           Explore our handpicked holiday deals below and click any offer to learn more.<br><br>
@@ -25,14 +26,18 @@ export default async function handler(req, res) {
         ]]></description>
       </item>`;
 
-    // Now add the actual offers
+    // Actual offers
     offers.forEach((o, index) => {
       rss += `
         <item>
           <title><![CDATA[${o.title}]]></title>
           <link>${o.link}</link>
           <guid isPermaLink="false">${o.id || `offer-${index}`}</guid>
-          <description><![CDATA[${o.subtitle || ""}<br><img src="${o.image}" />]]></description>
+          <pubDate>${new Date(o._publishDate || o._createdDate || Date.now()).toUTCString()}</pubDate>
+          <description><![CDATA[
+            ${o.subtitle || ""}<br>
+            <img src="${o.image}" />
+          ]]></description>
         </item>`;
     });
 
