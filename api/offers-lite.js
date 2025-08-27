@@ -12,12 +12,13 @@ export default async function handler(req, res) {
       <description>Lite feed of current holiday offers from Boullies Travel</description>
       <atom:link href="https://boullies-rss.vercel.app/api/offers-lite" rel="self" type="application/rss+xml" />`;
 
-    // Intro/pinned item
+    // Intro/pinned item (rotates daily)
+    const todayGuid = `intro-${new Date().toISOString().slice(0,10)}`;
     rss += `
       <item>
         <title><![CDATA[✨ Discover Our Latest Travel Offers ✨]]></title>
         <link>https://www.boulliestravel.com/holiday-offers</link>
-        <guid isPermaLink="false">intro-message</guid>
+        <guid isPermaLink="false">${todayGuid}</guid>
         <pubDate>${new Date().toUTCString()}</pubDate>
         <description><![CDATA[
           Looking for your next adventure? 🌍✈️<br><br>
@@ -36,7 +37,7 @@ export default async function handler(req, res) {
           <pubDate>${new Date(o._publishDate || o._createdDate || Date.now()).toUTCString()}</pubDate>
           <description><![CDATA[
             ${o.subtitle || ""}<br>
-            <img src="${o.image}" />
+            ${o.image ? `<img src="${o.image}" />` : ""}
           ]]></description>
         </item>`;
     });
